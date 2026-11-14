@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const unreachable = useRef(false);
   const offlineRef = useRef(false);
 
-  const useSaved = useCallback((saved: SavedAccess) => {
+  const applySaved = useCallback((saved: SavedAccess) => {
     offlineRef.current = true;
     setOfflineUser(saved.user); setRoles(saved.roles); setProfile(saved.profile);
     setStatus(saved.roles.length ? "ready" : "no_role");
@@ -84,13 +84,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cantReach = () => !navigator.onLine || unreachable.current;
     if (!s?.user) {
       // No live sign-in. If that's only because we're offline, keep working as the last account on this device.
-      if (saved && cantReach()) { useSaved(saved); return; }
+      if (saved && cantReach()) { applySaved(saved); return; }
       offlineRef.current = false;
       setOfflineUser(null); setStatus("signed_out"); setRoles([]); setProfile(null); return;
     }
     let access = await loadAccess(s.user.id);
     if (!access) {
-      if (saved && saved.user.id === s.user.id) { useSaved({ ...saved, user: s.user }); return; }
+      if (saved && saved.user.id === s.user.id) { applySaved({ ...saved, user: s.user }); return; }
       access = { roles: [], profile: null };
     }
     if (access.roles.length === 0 && activating.current !== s.user.id) {
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(access.profile);
     if (access.roles.length) save({ user: s.user, ...access });
     setStatus(access.roles.length ? "ready" : "no_role");
-  }, [useSaved]);
+  }, [applySaved]);
 
   useEffect(() => {
     const check = () => supabase.auth.getSession().then(({ data, error }) => {
