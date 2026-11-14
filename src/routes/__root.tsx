@@ -8,6 +8,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { setupOfflineApp } from "@/lib/offline/register-sw";
+import { PAGES } from "@/lib/pages";
 
 function NotFoundComponent() {
   return (
@@ -82,8 +84,14 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const OFFLINE_PAGES = ["/", "/login", "/activate", ...PAGES.map((p) => p.path)];
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    const t = setTimeout(() => { void setupOfflineApp(OFFLINE_PAGES); }, 4000);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
