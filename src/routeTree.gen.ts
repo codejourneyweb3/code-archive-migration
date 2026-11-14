@@ -10,33 +10,362 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as ActivateRouteImport } from './routes/activate'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AppAiInsightsRouteImport } from './routes/_app/ai-insights'
+import { Route as AppAnalyticsRouteImport } from './routes/_app/analytics'
+import { Route as AppAssessmentsRouteImport } from './routes/_app/assessments'
+import { Route as AppAuditLogRouteImport } from './routes/_app/audit-log'
+import { Route as AppBudgetRouteImport } from './routes/_app/budget'
+import { Route as AppClassesRouteImport } from './routes/_app/classes'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppDefaultersRouteImport } from './routes/_app/defaulters'
+import { Route as AppEnrollmentRouteImport } from './routes/_app/enrollment'
+import { Route as AppFeesRouteImport } from './routes/_app/fees'
+import { Route as AppFinanceRouteImport } from './routes/_app/finance'
+import { Route as AppGradebookRouteImport } from './routes/_app/gradebook'
+import { Route as AppMarksEntryRouteImport } from './routes/_app/marks-entry'
+import { Route as AppNoAccessRouteImport } from './routes/_app/no-access'
+import { Route as AppPromotionRouteImport } from './routes/_app/promotion'
+import { Route as AppReportCardsRouteImport } from './routes/_app/report-cards'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppStudentPerformanceRouteImport } from './routes/_app/student-performance'
+import { Route as AppStudentsRouteImport } from './routes/_app/students'
+import { Route as AppTeachersRouteImport } from './routes/_app/teachers'
+import { Route as AppTermsRouteImport } from './routes/_app/terms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivateRoute = ActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAiInsightsRoute = AppAiInsightsRouteImport.update({
+  id: '/ai-insights',
+  path: '/ai-insights',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssessmentsRoute = AppAssessmentsRouteImport.update({
+  id: '/assessments',
+  path: '/assessments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuditLogRoute = AppAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBudgetRoute = AppBudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClassesRoute = AppClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDefaultersRoute = AppDefaultersRouteImport.update({
+  id: '/defaulters',
+  path: '/defaulters',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEnrollmentRoute = AppEnrollmentRouteImport.update({
+  id: '/enrollment',
+  path: '/enrollment',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeesRoute = AppFeesRouteImport.update({
+  id: '/fees',
+  path: '/fees',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinanceRoute = AppFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGradebookRoute = AppGradebookRouteImport.update({
+  id: '/gradebook',
+  path: '/gradebook',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarksEntryRoute = AppMarksEntryRouteImport.update({
+  id: '/marks-entry',
+  path: '/marks-entry',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNoAccessRoute = AppNoAccessRouteImport.update({
+  id: '/no-access',
+  path: '/no-access',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPromotionRoute = AppPromotionRouteImport.update({
+  id: '/promotion',
+  path: '/promotion',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportCardsRoute = AppReportCardsRouteImport.update({
+  id: '/report-cards',
+  path: '/report-cards',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStudentPerformanceRoute = AppStudentPerformanceRouteImport.update({
+  id: '/student-performance',
+  path: '/student-performance',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStudentsRoute = AppStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeachersRoute = AppTeachersRouteImport.update({
+  id: '/teachers',
+  path: '/teachers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTermsRoute = AppTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activate': typeof ActivateRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/ai-insights': typeof AppAiInsightsRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/assessments': typeof AppAssessmentsRoute
+  '/audit-log': typeof AppAuditLogRoute
+  '/budget': typeof AppBudgetRoute
+  '/classes': typeof AppClassesRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/defaulters': typeof AppDefaultersRoute
+  '/enrollment': typeof AppEnrollmentRoute
+  '/fees': typeof AppFeesRoute
+  '/finance': typeof AppFinanceRoute
+  '/gradebook': typeof AppGradebookRoute
+  '/marks-entry': typeof AppMarksEntryRoute
+  '/no-access': typeof AppNoAccessRoute
+  '/promotion': typeof AppPromotionRoute
+  '/report-cards': typeof AppReportCardsRoute
+  '/settings': typeof AppSettingsRoute
+  '/student-performance': typeof AppStudentPerformanceRoute
+  '/students': typeof AppStudentsRoute
+  '/teachers': typeof AppTeachersRoute
+  '/terms': typeof AppTermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activate': typeof ActivateRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/ai-insights': typeof AppAiInsightsRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/assessments': typeof AppAssessmentsRoute
+  '/audit-log': typeof AppAuditLogRoute
+  '/budget': typeof AppBudgetRoute
+  '/classes': typeof AppClassesRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/defaulters': typeof AppDefaultersRoute
+  '/enrollment': typeof AppEnrollmentRoute
+  '/fees': typeof AppFeesRoute
+  '/finance': typeof AppFinanceRoute
+  '/gradebook': typeof AppGradebookRoute
+  '/marks-entry': typeof AppMarksEntryRoute
+  '/no-access': typeof AppNoAccessRoute
+  '/promotion': typeof AppPromotionRoute
+  '/report-cards': typeof AppReportCardsRoute
+  '/settings': typeof AppSettingsRoute
+  '/student-performance': typeof AppStudentPerformanceRoute
+  '/students': typeof AppStudentsRoute
+  '/teachers': typeof AppTeachersRoute
+  '/terms': typeof AppTermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/activate': typeof ActivateRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/_app/ai-insights': typeof AppAiInsightsRoute
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/assessments': typeof AppAssessmentsRoute
+  '/_app/audit-log': typeof AppAuditLogRoute
+  '/_app/budget': typeof AppBudgetRoute
+  '/_app/classes': typeof AppClassesRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/defaulters': typeof AppDefaultersRoute
+  '/_app/enrollment': typeof AppEnrollmentRoute
+  '/_app/fees': typeof AppFeesRoute
+  '/_app/finance': typeof AppFinanceRoute
+  '/_app/gradebook': typeof AppGradebookRoute
+  '/_app/marks-entry': typeof AppMarksEntryRoute
+  '/_app/no-access': typeof AppNoAccessRoute
+  '/_app/promotion': typeof AppPromotionRoute
+  '/_app/report-cards': typeof AppReportCardsRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/student-performance': typeof AppStudentPerformanceRoute
+  '/_app/students': typeof AppStudentsRoute
+  '/_app/teachers': typeof AppTeachersRoute
+  '/_app/terms': typeof AppTermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/activate'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/ai-insights'
+    | '/analytics'
+    | '/assessments'
+    | '/audit-log'
+    | '/budget'
+    | '/classes'
+    | '/dashboard'
+    | '/defaulters'
+    | '/enrollment'
+    | '/fees'
+    | '/finance'
+    | '/gradebook'
+    | '/marks-entry'
+    | '/no-access'
+    | '/promotion'
+    | '/report-cards'
+    | '/settings'
+    | '/student-performance'
+    | '/students'
+    | '/teachers'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/activate'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/ai-insights'
+    | '/analytics'
+    | '/assessments'
+    | '/audit-log'
+    | '/budget'
+    | '/classes'
+    | '/dashboard'
+    | '/defaulters'
+    | '/enrollment'
+    | '/fees'
+    | '/finance'
+    | '/gradebook'
+    | '/marks-entry'
+    | '/no-access'
+    | '/promotion'
+    | '/report-cards'
+    | '/settings'
+    | '/student-performance'
+    | '/students'
+    | '/teachers'
+    | '/terms'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/activate'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/signup'
+    | '/_app/ai-insights'
+    | '/_app/analytics'
+    | '/_app/assessments'
+    | '/_app/audit-log'
+    | '/_app/budget'
+    | '/_app/classes'
+    | '/_app/dashboard'
+    | '/_app/defaulters'
+    | '/_app/enrollment'
+    | '/_app/fees'
+    | '/_app/finance'
+    | '/_app/gradebook'
+    | '/_app/marks-entry'
+    | '/_app/no-access'
+    | '/_app/promotion'
+    | '/_app/report-cards'
+    | '/_app/settings'
+    | '/_app/student-performance'
+    | '/_app/students'
+    | '/_app/teachers'
+    | '/_app/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  ActivateRoute: typeof ActivateRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +377,256 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activate': {
+      id: '/activate'
+      path: '/activate'
+      fullPath: '/activate'
+      preLoaderRoute: typeof ActivateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/ai-insights': {
+      id: '/_app/ai-insights'
+      path: '/ai-insights'
+      fullPath: '/ai-insights'
+      preLoaderRoute: typeof AppAiInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assessments': {
+      id: '/_app/assessments'
+      path: '/assessments'
+      fullPath: '/assessments'
+      preLoaderRoute: typeof AppAssessmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/audit-log': {
+      id: '/_app/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AppAuditLogRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/budget': {
+      id: '/_app/budget'
+      path: '/budget'
+      fullPath: '/budget'
+      preLoaderRoute: typeof AppBudgetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/classes': {
+      id: '/_app/classes'
+      path: '/classes'
+      fullPath: '/classes'
+      preLoaderRoute: typeof AppClassesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/defaulters': {
+      id: '/_app/defaulters'
+      path: '/defaulters'
+      fullPath: '/defaulters'
+      preLoaderRoute: typeof AppDefaultersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/enrollment': {
+      id: '/_app/enrollment'
+      path: '/enrollment'
+      fullPath: '/enrollment'
+      preLoaderRoute: typeof AppEnrollmentRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fees': {
+      id: '/_app/fees'
+      path: '/fees'
+      fullPath: '/fees'
+      preLoaderRoute: typeof AppFeesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finance': {
+      id: '/_app/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AppFinanceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/gradebook': {
+      id: '/_app/gradebook'
+      path: '/gradebook'
+      fullPath: '/gradebook'
+      preLoaderRoute: typeof AppGradebookRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/marks-entry': {
+      id: '/_app/marks-entry'
+      path: '/marks-entry'
+      fullPath: '/marks-entry'
+      preLoaderRoute: typeof AppMarksEntryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/no-access': {
+      id: '/_app/no-access'
+      path: '/no-access'
+      fullPath: '/no-access'
+      preLoaderRoute: typeof AppNoAccessRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/promotion': {
+      id: '/_app/promotion'
+      path: '/promotion'
+      fullPath: '/promotion'
+      preLoaderRoute: typeof AppPromotionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/report-cards': {
+      id: '/_app/report-cards'
+      path: '/report-cards'
+      fullPath: '/report-cards'
+      preLoaderRoute: typeof AppReportCardsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/student-performance': {
+      id: '/_app/student-performance'
+      path: '/student-performance'
+      fullPath: '/student-performance'
+      preLoaderRoute: typeof AppStudentPerformanceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/students': {
+      id: '/_app/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof AppStudentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/teachers': {
+      id: '/_app/teachers'
+      path: '/teachers'
+      fullPath: '/teachers'
+      preLoaderRoute: typeof AppTeachersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/terms': {
+      id: '/_app/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof AppTermsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAiInsightsRoute: typeof AppAiInsightsRoute
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppAssessmentsRoute: typeof AppAssessmentsRoute
+  AppAuditLogRoute: typeof AppAuditLogRoute
+  AppBudgetRoute: typeof AppBudgetRoute
+  AppClassesRoute: typeof AppClassesRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppDefaultersRoute: typeof AppDefaultersRoute
+  AppEnrollmentRoute: typeof AppEnrollmentRoute
+  AppFeesRoute: typeof AppFeesRoute
+  AppFinanceRoute: typeof AppFinanceRoute
+  AppGradebookRoute: typeof AppGradebookRoute
+  AppMarksEntryRoute: typeof AppMarksEntryRoute
+  AppNoAccessRoute: typeof AppNoAccessRoute
+  AppPromotionRoute: typeof AppPromotionRoute
+  AppReportCardsRoute: typeof AppReportCardsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppStudentPerformanceRoute: typeof AppStudentPerformanceRoute
+  AppStudentsRoute: typeof AppStudentsRoute
+  AppTeachersRoute: typeof AppTeachersRoute
+  AppTermsRoute: typeof AppTermsRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAiInsightsRoute: AppAiInsightsRoute,
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppAssessmentsRoute: AppAssessmentsRoute,
+  AppAuditLogRoute: AppAuditLogRoute,
+  AppBudgetRoute: AppBudgetRoute,
+  AppClassesRoute: AppClassesRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppDefaultersRoute: AppDefaultersRoute,
+  AppEnrollmentRoute: AppEnrollmentRoute,
+  AppFeesRoute: AppFeesRoute,
+  AppFinanceRoute: AppFinanceRoute,
+  AppGradebookRoute: AppGradebookRoute,
+  AppMarksEntryRoute: AppMarksEntryRoute,
+  AppNoAccessRoute: AppNoAccessRoute,
+  AppPromotionRoute: AppPromotionRoute,
+  AppReportCardsRoute: AppReportCardsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppStudentPerformanceRoute: AppStudentPerformanceRoute,
+  AppStudentsRoute: AppStudentsRoute,
+  AppTeachersRoute: AppTeachersRoute,
+  AppTermsRoute: AppTermsRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  ActivateRoute: ActivateRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
