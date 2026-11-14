@@ -187,7 +187,8 @@ class SyncEngine {
       try {
         await withLock(async () => {
           const pushed = await this.push();
-          if (opts.pull || pushed > 0 && Date.now() - this.lastPullMs > PULL_EVERY_MS || Date.now() - this.lastPullMs > PULL_EVERY_MS) await this.pull();
+          if (opts.pull || Date.now() - this.lastPullMs > PULL_EVERY_MS) await this.pull();
+          void pushed;
         });
         this.set({ reachable: true, lastError: null });
       } catch (e) {
