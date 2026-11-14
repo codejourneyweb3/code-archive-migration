@@ -31,7 +31,7 @@ describe("offline saves", () => {
       .rejects.toThrow("students_active_lin_unique");
   });
 
-  it("lets a terminated student's LIN be reused by nobody else while it is active only", async () => {
+  it("allows a new student to reuse the LIN of a terminated student", async () => {
     const store = new MemoryStore({ students: [completeRow("students", { id: 1, full_name: "A", lin: "L1", is_active: false })] });
     await expect(save(store, { kind: "insert", table: "students", rows: [{ full_name: "B", lin: "L1" }] })).resolves.toBeTruthy();
   });
