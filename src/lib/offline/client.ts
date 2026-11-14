@@ -10,7 +10,7 @@ import { syncEngine } from "./sync";
 import type { SyncedTable } from "./schema";
 
 export interface LocalError { message: string; code: string }
-export interface LocalResult<T> { data: T | null; error: LocalError | null }
+export type LocalResult<T> = { data: T; error: null } | { data: null; error: LocalError };
 
 function toError(e: unknown): LocalError {
   if (e instanceof LocalWriteError) return { message: e.message, code: e.code };
@@ -59,11 +59,11 @@ class LocalQuery<R> implements PromiseLike<LocalResult<R[]>> {
 
   single(): PromiseLike<LocalResult<R>> {
     return this.run().then((r) => r.error ? { data: null, error: r.error }
-      : r.data?.length === 1 ? { data: r.data[0]!, error: null }
-      : { data: null, error: { message: `Expected one row, found ${r.data?.length ?? 0}`, code: "PGRST116" } });
+      : r.data.length === 1 ? { data: r.data[0]!, error: null }
+      : { data: null, error: { message: `Expected one row, found ${r.data.length}`, code: "PGRST116" } });
   }
-  maybeSingle(): PromiseLike<LocalResult<R>> {
-    return this.run().then((r) => r.error ? { data: null, error: r.error } : { data: r.data?.[0] ?? null, error: null });
+  maybeSingle(): PromiseLike<LocalResult<R | null>> {
+    return this.run().then((r) => r.error ? { data: null, error: r.error } : { data: r.data[0] ?? null, error: null });
   }
 
   then<A = LocalResult<R[]>, B = never>(ok?: ((v: LocalResult<R[]>) => A | PromiseLike<A>) | null, fail?: ((e: unknown) => B | PromiseLike<B>) | null) {
