@@ -1,0 +1,103 @@
+{
+  "source": "code-archive: AutoSchool360.zip (WinUI 3 / .NET 8 desktop app 'AutoTable', SQLite via EF Core)",
+  "capabilities": [
+    {
+      "capability": "code: desktop UI (19 pages) rebuilt as web app",
+      "source": "Views/*.xaml, ViewModels/*",
+      "outcome": "migrate",
+      "status": "verified_build",
+      "next_action": "Signed-in pages need a live check once an admin account exists"
+    },
+    {
+      "capability": "schema",
+      "source": "AutoTable/Data/Entities/StudentEntity.cs + SchemaPatches.cs",
+      "outcome": "migrate",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "records",
+      "source": "local SQLite file %LOCALAPPDATA%/AutoTable/autotable.db (not in archive)",
+      "outcome": "migrate",
+      "status": "pending",
+      "next_action": "Ask user for CSV/JSON export of SQLite tables after preview"
+    },
+    {
+      "capability": "auth identities",
+      "source": "Users table (email + SHA-256 salted hash)",
+      "outcome": "migrate",
+      "status": "pending",
+      "next_action": "Need Users export; passwords not carried over, users set new password on first sign-in"
+    },
+    {
+      "capability": "authorization: admin vs data entrant + AllowedPages, admin-only pages",
+      "source": "NavigationService.cs, SessionService.cs",
+      "outcome": "migrate",
+      "status": "implemented",
+      "next_action": "Unit-tested; live check pending first sign-in"
+    },
+    {
+      "capability": "first-run admin registration + invite-code data-entrant signup",
+      "source": "AuthService.cs, InviteCodeEntity",
+      "outcome": "migrate",
+      "status": "implemented",
+      "next_action": "Live check pending: user creates admin account"
+    },
+    {
+      "capability": "uploaded file bytes: student photos, school logo (BLOBs)",
+      "source": "Students.PhotoBytes, SchoolSettings.LogoBytes",
+      "outcome": "migrate",
+      "status": "pending",
+      "next_action": "Storage bucket; bytes need export with records"
+    },
+    {
+      "capability": "report card A4 print + PDF export (QuestPDF, Windows PrintManager)",
+      "source": "Reports/ReportCards/*",
+      "outcome": "migrate",
+      "status": "implemented",
+      "next_action": "Live print check pending sign-in"
+    },
+    {
+      "capability": "AI insights (rule-based, no external AI provider)",
+      "source": "AiInsightsViewModel.cs",
+      "outcome": "migrate",
+      "status": "implemented",
+      "next_action": "none"
+    },
+    {
+      "capability": "user tour, light/dark theme",
+      "source": "UserTourService.cs, ThemeService.cs",
+      "outcome": "migrate",
+      "status": "implemented",
+      "next_action": "none"
+    },
+    {
+      "capability": "external providers / webhooks / schedules / secrets",
+      "source": "none detected (offline desktop app)",
+      "outcome": "none",
+      "status": "verified",
+      "next_action": "none"
+    },
+    {
+      "capability": "offline-first local storage",
+      "source": "SQLite",
+      "outcome": "replaced by online Lovable Cloud database",
+      "status": "accepted_by_design",
+      "next_action": "none"
+    },
+    {
+      "capability": "cutover",
+      "source": "desktop installer",
+      "outcome": "pending",
+      "status": "pending",
+      "next_action": "Publish web app after data import"
+    },
+    {
+      "capability": "verification",
+      "source": "-",
+      "outcome": "pending",
+      "status": "pending",
+      "next_action": "End-to-end check after build"
+    }
+  ]
+}
