@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { OfflineBridge, useSyncState } from "@/lib/offline/react";
+import { OfflineBanner, SyncStatus } from "@/components/offline/SyncStatus";
 
 export const Route = createFileRoute("/_app")({
   ssr: false,
@@ -22,12 +24,12 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayout() {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   useEffect(() => { applyStoredTheme(); }, []);
   if (status === "loading") return <div className="min-h-screen bg-background"><Loading label="Opening your school…" /></div>;
   if (status === "signed_out") return <Navigate to="/login" />;
   if (status === "no_role") return <Navigate to="/activate" />;
-  return <TermProvider><Shell /></TermProvider>;
+  return <>{user && <OfflineBridge userId={user.id} />}<TermProvider><Shell /></TermProvider></>;
 }
 
 function Sidebar({ onNavigate, onTour }: { onNavigate?: () => void; onTour: () => void }) {
@@ -81,6 +83,7 @@ function Sidebar({ onNavigate, onTour }: { onNavigate?: () => void; onTour: () =
 
 function Shell() {
   const { user, profile, isAdmin, allowedPages, signOut } = useAuth();
+  const sync = useSyncState();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { terms, termId, setTermId } = useTermContext();
@@ -141,6 +144,7 @@ function Shell() {
               {terms.map((t) => <option key={t.id} value={t.id}>{t.name}{t.is_active ? " • active" : ""}</option>)}
             </NativeSelect>
           </div>
+          <SyncStatus />
           <Button data-tour="theme-toggle" variant="ghost" size="icon" aria-label="Toggle theme" onClick={() => setDark(toggleTheme() === "dark")}>{dark ? <Sun /> : <Moon />}</Button>
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-full p-0.5 hover:bg-muted">
@@ -152,10 +156,19 @@ function Shell() {
                 <p className="text-xs font-normal text-muted-foreground">{isAdmin ? "Administrator" : "Data Entrant"}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const waiting = sync.entries.filter((e) => e.userId === sync.userId).length;
+                const warn = [
+                  waiting ? `${waiting} change${waiting === 1 ? " hasn't" : "s haven't"} synced yet. They stay on this device and sync next time you sign in here.` : "",
+                  !sync.online ? "You're offline, so you won't be able to sign back in until you reconnect." : "",
+                ].filter(Boolean).join("\n\n");
+                if (warn && !window.confirm(`${warn}\n\nSign out anyway?`)) return;
+                void signOut();
+              }}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
+        <OfflineBanner />
         <main className="flex-1 px-4 py-6 md:px-8">
           {allowed ? <Outlet /> : <AccessRestricted to={landingPath(isAdmin, allowedPages)} />}
         </main>

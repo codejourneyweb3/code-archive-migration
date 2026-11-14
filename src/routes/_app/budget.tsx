@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, PiggyBank, Wallet, Scale, Percent } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useBudgetLines, useInvalidate, type BudgetLine } from "@/lib/db";
 import { errMsg, ugx } from "@/lib/format";
 import { pageHead } from "@/lib/seo";
@@ -29,7 +29,7 @@ function BudgetPage() {
   const total = list.reduce((p, l) => p + l.budgeted, 0), spent = list.reduce((p, l) => p + l.spent, 0);
   async function remove(l: BudgetLine) {
     if (!confirm(`Delete "${l.category}"?`)) return;
-    const { error } = await supabase.from("budget_lines").delete().eq("id", l.id);
+    const { error } = await local.from("budget_lines").delete().eq("id", l.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("budget_lines");
   }
@@ -67,7 +67,7 @@ function LineDialog({ line, defaultYear, onClose }: { line: BudgetLine | null; d
   async function save() {
     if (!f.category.trim()) { toast.error("Category is required."); return; }
     const row = { category: f.category.trim(), budgeted: Number(f.budgeted) || 0, spent: Number(f.spent) || 0, financial_year: f.financial_year.trim() };
-    const { error } = line ? await supabase.from("budget_lines").update(row).eq("id", line.id) : await supabase.from("budget_lines").insert(row);
+    const { error } = line ? await local.from("budget_lines").update(row).eq("id", line.id) : await local.from("budget_lines").insert(row);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("budget_lines"); onClose();
   }

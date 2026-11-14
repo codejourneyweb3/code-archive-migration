@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Printer, Search, Wallet, Target, AlertCircle, Percent } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useClasses, useFeePayments, useInvalidate, useSchoolSettings, useStudentCredits, useStudents, useTermFees, type FeePayment, type Student } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { useTermContext } from "@/lib/term-context";
@@ -99,15 +99,15 @@ function PaymentDialog({ initial, termId, onClose, onSaved }: { initial: Student
     if (!amt || amt <= 0) { toast.error("Enter an amount greater than zero."); return; }
     setBusy(true);
     try {
-      const { error } = await supabase.from("fee_payments").insert({ student_id: student.id, amount: amt, term_id: termId, recorded_by: user?.id ?? null, description: desc || null });
+      const { error } = await local.from("fee_payments").insert({ student_id: student.id, amount: amt, term_id: termId, recorded_by: user?.id ?? null, description: desc || null });
       if (error) throw error;
       // Carry any overpayment forward as a credit (one open credit per student per term).
       const unapplied = credits.filter((c) => c.student_id === student.id && !c.applied_at && c.from_term_id !== termId).reduce((s, c) => s + c.amount, 0);
       const over = overpaymentFor(expected, paid + amt, unapplied);
       if (over > 0) {
         const open = credits.find((c) => c.student_id === student.id && c.from_term_id === termId && !c.applied_at);
-        if (open) await supabase.from("student_credits").update({ amount: over }).eq("id", open.id);
-        else await supabase.from("student_credits").insert({ student_id: student.id, from_term_id: termId, amount: over, description: "Overpayment carry-forward" });
+        if (open) await local.from("student_credits").update({ amount: over }).eq("id", open.id);
+        else await local.from("student_credits").insert({ student_id: student.id, from_term_id: termId, amount: over, description: "Overpayment carry-forward" });
       }
       await invalidate("fee_payments", "student_credits");
       toast.success(`Payment of ${ugx(amt)} recorded for ${student.full_name}.`);

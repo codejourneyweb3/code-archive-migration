@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, CalendarCheck2, Users, Wallet, Receipt } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useClasses, useFeePayments, useInvalidate, useStudents, useTermFees, useTerms, type Term } from "@/lib/db";
 import { feeRegister } from "@/lib/finance";
 import { errMsg, fmtDate, ugx } from "@/lib/format";
@@ -41,18 +41,18 @@ function TermsPage() {
   if (isLoading) return <Loading />;
 
   async function activate(t: Term) {
-    const { error } = await supabase.rpc("set_active_term", { _term_id: t.id });
+    const { error } = await local.rpc("set_active_term", { _term_id: t.id });
     if (error) { toast.error(errMsg(error)); return; }
     toast.success(`${t.name} is now the active term.`); invalidate("terms");
   }
   async function deactivate(t: Term) {
-    const { error } = await supabase.from("terms").update({ is_active: false }).eq("id", t.id);
+    const { error } = await local.from("terms").update({ is_active: false }).eq("id", t.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("terms");
   }
   async function remove(t: Term) {
     if (!confirm(`Delete ${t.name}? Fees for this term are removed.`)) return;
-    const { error } = await supabase.from("terms").delete().eq("id", t.id);
+    const { error } = await local.from("terms").delete().eq("id", t.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("terms", "term_fees");
   }
@@ -60,7 +60,7 @@ function TermsPage() {
     if (!selTermId) return;
     const amount = Number(feeDraft[classId]);
     if (isNaN(amount) || amount < 0) { toast.error("Enter a valid amount."); return; }
-    const { error } = await supabase.from("term_fees").upsert({ term_id: selTermId, class_id: classId, amount }, { onConflict: "term_id,class_id" });
+    const { error } = await local.from("term_fees").upsert({ term_id: selTermId, class_id: classId, amount }, { onConflict: "term_id,class_id" });
     if (error) { toast.error(errMsg(error)); return; }
     toast.success("Fee saved."); invalidate("term_fees");
   }
@@ -138,7 +138,7 @@ function TermDialog({ term, onClose }: { term: Term | null; onClose: () => void 
     if (!name.trim()) { toast.error("Name is required."); return; }
     if (start && end && end < start) { toast.error("End date must be after start date."); return; }
     const row = { name: name.trim(), start_date: start || null, end_date: end || null };
-    const { error } = term ? await supabase.from("terms").update(row).eq("id", term.id) : await supabase.from("terms").insert(row);
+    const { error } = term ? await local.from("terms").update(row).eq("id", term.id) : await local.from("terms").insert(row);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("terms"); onClose();
   }

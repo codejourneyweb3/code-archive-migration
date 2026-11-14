@@ -1,6 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { localDb } from "@/lib/offline/local-db";
+import { local } from "@/lib/offline/client";
+import { syncEngine } from "@/lib/offline/sync";
 
 export type Student = Tables<"students">;
 export type ClassRow = Tables<"classes">;
@@ -31,7 +34,7 @@ type TableName =
   | "terms" | "academic_years" | "assessments" | "assessment_subjects" | "marks"
   | "grading_systems" | "grade_bands" | "teachers" | "term_fees" | "fee_payments"
   | "student_credits" | "budget_lines" | "head_teacher_comments" | "termination_logs"
-  | "enrollments" | "invite_codes";
+  | "enrollments" | "invite_codes" | "school_settings";
 
 const ORDER: Partial<Record<TableName, string>> = {
   students: "full_name", classes: "name", streams: "name", subjects: "name",
@@ -41,20 +44,19 @@ const ORDER: Partial<Record<TableName, string>> = {
   head_teacher_comments: "id", termination_logs: "id", enrollments: "id", invite_codes: "id",
 };
 
-/** Reads every row of a table, paging past the 1000-row API limit. */
+/** Reads every row of a table from the device copy (kept in sync with the server), in display order. */
 export async function fetchAll<T>(table: TableName): Promise<T[]> {
-  const pageSize = 1000;
-  const out: T[] = [];
-  for (let from = 0; ; from += pageSize) {
-    let q = supabase.from(table).select("*").range(from, from + pageSize - 1);
-    const col = ORDER[table];
-    if (col) q = q.order(col, { ascending: true });
-    const { data, error } = await q;
-    if (error) throw error;
-    out.push(...((data ?? []) as T[]));
-    if (!data || data.length < pageSize) break;
+  await syncEngine.whenReady();
+  const rows = await localDb().rows(table).toArray();
+  const col = ORDER[table];
+  if (col) {
+    rows.sort((a, b) => {
+      const x = a[col], y = b[col];
+      if (typeof x === "string" && typeof y === "string") return x.localeCompare(y, undefined, { sensitivity: "base" });
+      return Number(x ?? 0) - Number(y ?? 0);
+    });
   }
-  return out;
+  return rows as T[];
 }
 
 export function useTable<T>(table: TableName, enabled = true) {
@@ -62,7 +64,8 @@ export function useTable<T>(table: TableName, enabled = true) {
     queryKey: ["table", table],
     queryFn: () => fetchAll<T>(table),
     enabled,
-    staleTime: 30_000,
+    staleTime: Infinity,
+    networkMode: "always",
   });
 }
 
@@ -98,22 +101,26 @@ export const useInviteCodes = (enabled = true) => useTable<InviteCode>("invite_c
 export function useSchoolSettings() {
   return useQuery({
     queryKey: ["school_settings"],
+    networkMode: "always",
+    staleTime: Infinity,
     queryFn: async () => {
-      const { data, error } = await supabase.from("school_settings").select("*").eq("id", 1).maybeSingle();
-      if (error) throw error;
-      return data as SchoolSettings | null;
+      await syncEngine.whenReady();
+      return ((await localDb().rows("school_settings").get(1)) as SchoolSettings | undefined) ?? null;
     },
-    staleTime: 60_000,
   });
 }
 
-/** Signed URL for a private school-media object (student photo, school logo). */
+/** Displayable URL for a school-media file (student photo, school logo): the device copy if there is one, else a signed link. */
 export function useMediaUrl(path: string | null | undefined) {
   return useQuery({
     queryKey: ["media", path],
     enabled: !!path,
     staleTime: 50 * 60_000,
+    networkMode: "always",
     queryFn: async () => {
+      const file = await localDb().files.get(path!);
+      if (file) return URL.createObjectURL(file.blob);
+      if (typeof navigator !== "undefined" && !navigator.onLine) return null;
       const { data, error } = await supabase.storage.from("school-media").createSignedUrl(path!, 3600);
       if (error) throw error;
       return data.signedUrl;
@@ -121,12 +128,9 @@ export function useMediaUrl(path: string | null | undefined) {
   });
 }
 
+/** Keeps the file on this device and uploads it when online; returns the path to store on the record. */
 export async function uploadMedia(folder: string, file: File): Promise<string> {
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("school-media").upload(path, file, { upsert: false, contentType: file.type });
-  if (error) throw error;
-  return path;
+  return local.upload(folder, file);
 }
 
 /** Bundle of the academic tables most pages need together. */

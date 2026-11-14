@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Copy, KeyRound, Trash2, Upload, GraduationCap, ShieldOff, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
+import { useSyncState } from "@/lib/offline/react";
 import { uploadMedia, useInviteCodes, useInvalidate, useMediaUrl, useSchoolSettings } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { GRANTABLE, PAGES, parseAllowed, type PageTag } from "@/lib/pages";
@@ -53,7 +55,7 @@ function SchoolProfile() {
   async function save() {
     try {
       const logo_path = logo ? await uploadMedia("branding", logo) : s?.logo_path ?? null;
-      const { error } = await supabase.from("school_settings").upsert({ id: 1, ...f, logo_path, updated_at: new Date().toISOString() });
+      const { error } = await local.from("school_settings").upsert({ id: 1, ...f, logo_path, updated_at: new Date().toISOString() });
       if (error) throw error;
       setLogo(null); toast.success("School settings saved."); qc.invalidateQueries({ queryKey: ["school_settings"] });
     } catch (e) { toast.error(errMsg(e)); }
@@ -94,14 +96,14 @@ function Invites() {
   async function generate() {
     const code = genCode();
     const expires = new Date(Date.now() + 30 * 86400000).toISOString();
-    const { error } = await supabase.from("invite_codes").insert({ code, label: lbl || null, allowed_pages: pages.length ? pages.join(",") : null, created_by: user?.id ?? null, expires_at: expires, role: "data_entrant" });
+    const { error } = await local.from("invite_codes").insert({ code, label: lbl || null, allowed_pages: pages.length ? pages.join(",") : null, created_by: user?.id ?? null, expires_at: expires, role: "data_entrant" });
     if (error) { toast.error(errMsg(error)); return; }
     await navigator.clipboard?.writeText(code).catch(() => {});
-    toast.success(`Invite code ${code} created and copied.`);
+    toast.success(navigator.onLine ? `Invite code ${code} created and copied.` : `Invite code ${code} created and copied. It starts working once this device syncs.`);
     setLbl(""); invalidate("invite_codes");
   }
   async function revoke(id: number) {
-    const { error } = await supabase.from("invite_codes").delete().eq("id", id);
+    const { error } = await local.from("invite_codes").delete().eq("id", id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("invite_codes");
   }
@@ -152,6 +154,8 @@ interface Account { id: string; full_name: string; email: string | null; allowed
 
 function Accounts() {
   const { user } = useAuth();
+  const sync = useSyncState();
+  const connected = sync.online && sync.reachable;
   const q = useQuery({
     queryKey: ["accounts"],
     queryFn: async () => {
@@ -169,7 +173,8 @@ function Accounts() {
   }
   return (
     <Panel title="Active accounts" bodyClassName="p-0">
-      {q.isLoading ? <Loading /> : (
+      {!connected && <p className="border-b bg-warning/10 px-4 py-2.5 text-xs text-warning-foreground dark:text-warning">Staff accounts are managed on the school server. Connect to the internet to view or change who has access.</p>}
+      {q.isLoading && connected ? <Loading /> : (
         <Table>
           <thead><tr><Th>Name</Th><Th>Email</Th><Th>Role</Th><Th>Pages</Th><Th /></tr></thead>
           <tbody>{(q.data ?? []).map((a) => (
@@ -179,8 +184,8 @@ function Accounts() {
               <Td className="max-w-xs text-xs">{a.roles.includes("admin") ? "Everything" : parseAllowed(a.allowed_pages)?.map(label).join(", ") ?? "All non-admin pages"}</Td>
               <Td className="whitespace-nowrap text-right">
                 {!a.roles.includes("admin") && a.roles.length > 0 && <>
-                  <Button size="sm" variant="ghost" onClick={() => setEdit(a)}>Edit pages</Button>
-                  {a.id !== user?.id && <Button size="sm" variant="danger-ghost" onClick={() => revoke(a)}><ShieldOff /> Revoke</Button>}
+                  <Button size="sm" variant="ghost" disabled={!connected} onClick={() => setEdit(a)}>Edit pages</Button>
+                  {a.id !== user?.id && <Button size="sm" variant="danger-ghost" disabled={!connected} onClick={() => revoke(a)}><ShieldOff /> Revoke</Button>}
                 </>}
               </Td>
             </tr>
