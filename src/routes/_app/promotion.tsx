@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowUpCircle, Repeat, ArrowRightLeft, RotateCcw, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useAcademicData, useInvalidate } from "@/lib/db";
 import { PROMOTION_STATUS, promotionOverview, promotionStatusLabel, type PromotionRow } from "@/lib/academics";
 import { errMsg } from "@/lib/format";
@@ -27,21 +27,21 @@ function PromotionPage() {
   const now = () => new Date().toISOString();
   async function promote(r: PromotionRow) {
     const dest = Number(targets[r.studentId] ?? r.targetClassId) || null;
-    const { error } = await supabase.from("students").update({ promotion_status: PROMOTION_STATUS.Promoted, promoted_to_class_id: dest, promotion_processed_at: now(), ...(dest ? { class_id: dest, stream_id: null } : {}) }).eq("id", r.studentId);
+    const { error } = await local.from("students").update({ promotion_status: PROMOTION_STATUS.Promoted, promoted_to_class_id: dest, promotion_processed_at: now(), ...(dest ? { class_id: dest, stream_id: null } : {}) }).eq("id", r.studentId);
     if (error) throw error;
   }
   async function repeat(r: PromotionRow) {
-    const { error } = await supabase.from("students").update({ promotion_status: PROMOTION_STATUS.Repeat, promoted_to_class_id: null, promotion_processed_at: now() }).eq("id", r.studentId);
+    const { error } = await local.from("students").update({ promotion_status: PROMOTION_STATUS.Repeat, promoted_to_class_id: null, promotion_processed_at: now() }).eq("id", r.studentId);
     if (error) throw error;
   }
   async function shift(r: PromotionRow) {
     const dest = Number(targets[r.studentId]);
     if (!dest) { toast.error("Choose the class to shift to."); return; }
-    const { error } = await supabase.from("students").update({ promotion_status: PROMOTION_STATUS.Shifted, promoted_to_class_id: dest, class_id: dest, stream_id: null, promotion_processed_at: now() }).eq("id", r.studentId);
+    const { error } = await local.from("students").update({ promotion_status: PROMOTION_STATUS.Shifted, promoted_to_class_id: dest, class_id: dest, stream_id: null, promotion_processed_at: now() }).eq("id", r.studentId);
     if (error) throw error;
   }
   async function reset(r: PromotionRow) {
-    const { error } = await supabase.from("students").update({ promotion_status: PROMOTION_STATUS.Pending, promoted_to_class_id: null, promotion_processed_at: null }).eq("id", r.studentId);
+    const { error } = await local.from("students").update({ promotion_status: PROMOTION_STATUS.Pending, promoted_to_class_id: null, promotion_processed_at: null }).eq("id", r.studentId);
     if (error) throw error;
   }
   const run = (fn: (r: PromotionRow) => Promise<void>, r: PromotionRow) => async () => { try { await fn(r); await invalidate("students"); } catch (e) { toast.error(errMsg(e)); } };

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Copy, KeyRound, Trash2, Upload, GraduationCap, ShieldOff, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { uploadMedia, useInviteCodes, useInvalidate, useMediaUrl, useSchoolSettings } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { GRANTABLE, PAGES, parseAllowed, type PageTag } from "@/lib/pages";
@@ -53,7 +54,7 @@ function SchoolProfile() {
   async function save() {
     try {
       const logo_path = logo ? await uploadMedia("branding", logo) : s?.logo_path ?? null;
-      const { error } = await supabase.from("school_settings").upsert({ id: 1, ...f, logo_path, updated_at: new Date().toISOString() });
+      const { error } = await local.from("school_settings").upsert({ id: 1, ...f, logo_path, updated_at: new Date().toISOString() });
       if (error) throw error;
       setLogo(null); toast.success("School settings saved."); qc.invalidateQueries({ queryKey: ["school_settings"] });
     } catch (e) { toast.error(errMsg(e)); }
@@ -94,14 +95,14 @@ function Invites() {
   async function generate() {
     const code = genCode();
     const expires = new Date(Date.now() + 30 * 86400000).toISOString();
-    const { error } = await supabase.from("invite_codes").insert({ code, label: lbl || null, allowed_pages: pages.length ? pages.join(",") : null, created_by: user?.id ?? null, expires_at: expires, role: "data_entrant" });
+    const { error } = await local.from("invite_codes").insert({ code, label: lbl || null, allowed_pages: pages.length ? pages.join(",") : null, created_by: user?.id ?? null, expires_at: expires, role: "data_entrant" });
     if (error) { toast.error(errMsg(error)); return; }
     await navigator.clipboard?.writeText(code).catch(() => {});
     toast.success(`Invite code ${code} created and copied.`);
     setLbl(""); invalidate("invite_codes");
   }
   async function revoke(id: number) {
-    const { error } = await supabase.from("invite_codes").delete().eq("id", id);
+    const { error } = await local.from("invite_codes").delete().eq("id", id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("invite_codes");
   }

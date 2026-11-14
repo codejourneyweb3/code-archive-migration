@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Star } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import {
   useAcademicData, useInvalidate, useTeachers, type ClassRow, type GradingSystem,
 } from "@/lib/db";
@@ -34,8 +34,8 @@ function ClassesPage() {
   const gname = new Map(data.gradingSystems.map((g) => [g.id, g.name]));
 
   async function setDefault(g: GradingSystem) {
-    await supabase.from("grading_systems").update({ is_default: false }).neq("id", g.id);
-    const { error } = await supabase.from("grading_systems").update({ is_default: true }).eq("id", g.id);
+    await local.from("grading_systems").update({ is_default: false }).neq("id", g.id);
+    const { error } = await local.from("grading_systems").update({ is_default: true }).eq("id", g.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("grading_systems");
   }
@@ -62,7 +62,7 @@ function ClassesPage() {
                     </div>
                     <div className="flex gap-1">
                       {!g.is_default && <Button size="icon" variant="ghost" aria-label="Make default" onClick={() => setDefault(g)}><Star /></Button>}
-                      <Button size="icon" variant="danger-ghost" aria-label="Delete grading system" onClick={() => setConfirm({ title: `Delete ${g.name}?`, body: "Classes using it fall back to the school default.", run: async () => { const { error } = await supabase.from("grading_systems").delete().eq("id", g.id); if (error) throw error; await invalidate("grading_systems", "grade_bands", "classes"); } })}><Trash2 /></Button>
+                      <Button size="icon" variant="danger-ghost" aria-label="Delete grading system" onClick={() => setConfirm({ title: `Delete ${g.name}?`, body: "Classes using it fall back to the school default.", run: async () => { const { error } = await local.from("grading_systems").delete().eq("id", g.id); if (error) throw error; await invalidate("grading_systems", "grade_bands", "classes"); } })}><Trash2 /></Button>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
@@ -97,7 +97,7 @@ function ClassesPage() {
                     <Td>{data.students.filter((s) => s.class_id === c.id && s.is_active).length}</Td>
                     <Td className="text-right">
                       <Button size="icon" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}><Pencil /></Button>
-                      <Button size="icon" variant="danger-ghost" aria-label={`Delete ${c.name}`} onClick={() => setConfirm({ title: `Delete ${c.name}?`, body: "Its assessments and marks are deleted; students are left without a class.", run: async () => { const { error } = await supabase.from("classes").delete().eq("id", c.id); if (error) throw error; await invalidate("classes", "class_streams", "class_subjects", "assessments", "marks", "students"); } })}><Trash2 /></Button>
+                      <Button size="icon" variant="danger-ghost" aria-label={`Delete ${c.name}`} onClick={() => setConfirm({ title: `Delete ${c.name}?`, body: "Its assessments and marks are deleted; students are left without a class.", run: async () => { const { error } = await local.from("classes").delete().eq("id", c.id); if (error) throw error; await invalidate("classes", "class_streams", "class_subjects", "assessments", "marks", "students"); } })}><Trash2 /></Button>
                     </Td>
                   </tr>
                 );
@@ -143,8 +143,8 @@ function ClassDialog({ cls, onClose }: { cls: ClassRow | null; onClose: () => vo
     try {
       const row = { name: name.trim(), class_teacher_id: teacherId ? Number(teacherId) : null, grading_system_id: gsId ? Number(gsId) : null };
       let id = classId;
-      if (id) { const { error } = await supabase.from("classes").update(row).eq("id", id); if (error) throw error; }
-      else { const { data: ins, error } = await supabase.from("classes").insert(row).select("id").single(); if (error) throw error; id = ins.id; setClassId(id); }
+      if (id) { const { error } = await local.from("classes").update(row).eq("id", id); if (error) throw error; }
+      else { const { data: ins, error } = await local.from("classes").insert(row).select("id").single(); if (error) throw error; id = ins.id; setClassId(id); }
       await invalidate("classes");
       if (close) { toast.success("Class saved."); onClose(); }
       return id;
@@ -155,8 +155,8 @@ function ClassDialog({ cls, onClose }: { cls: ClassRow | null; onClose: () => vo
     const n = newStream.trim(); if (!n) return;
     const id = classId ?? (await save(false)); if (!id) return;
     let stream = data.streams.find((s) => s.name.toLowerCase() === n.toLowerCase());
-    if (!stream) { const { data: ins, error } = await supabase.from("streams").insert({ name: n }).select("*").single(); if (error) { toast.error(errMsg(error)); return; } stream = ins; }
-    const { error } = await supabase.from("class_streams").upsert({ class_id: id, stream_id: stream.id });
+    if (!stream) { const { data: ins, error } = await local.from("streams").insert({ name: n }).select("*").single(); if (error) { toast.error(errMsg(error)); return; } stream = ins; }
+    const { error } = await local.from("class_streams").upsert({ class_id: id, stream_id: stream.id });
     if (error) { toast.error(errMsg(error)); return; }
     setNewStream(""); invalidate("streams", "class_streams");
   }
@@ -164,13 +164,13 @@ function ClassDialog({ cls, onClose }: { cls: ClassRow | null; onClose: () => vo
     const n = newSubject.trim(); if (!n) return;
     const id = classId ?? (await save(false)); if (!id) return;
     let subj = data.subjects.find((s) => s.name.toLowerCase() === n.toLowerCase());
-    if (!subj) { const { data: ins, error } = await supabase.from("subjects").insert({ name: n }).select("*").single(); if (error) { toast.error(errMsg(error)); return; } subj = ins; }
-    const { error } = await supabase.from("class_subjects").upsert({ class_id: id, subject_id: subj.id });
+    if (!subj) { const { data: ins, error } = await local.from("subjects").insert({ name: n }).select("*").single(); if (error) { toast.error(errMsg(error)); return; } subj = ins; }
+    const { error } = await local.from("class_subjects").upsert({ class_id: id, subject_id: subj.id });
     if (error) { toast.error(errMsg(error)); return; }
     setNewSubject(""); invalidate("subjects", "class_subjects");
   }
-  async function removeStream(sid: number) { await supabase.from("class_streams").delete().eq("class_id", classId!).eq("stream_id", sid); invalidate("class_streams"); }
-  async function removeSubject(sid: number) { await supabase.from("class_subjects").delete().eq("class_id", classId!).eq("subject_id", sid); invalidate("class_subjects"); }
+  async function removeStream(sid: number) { await local.from("class_streams").delete().eq("class_id", classId!).eq("stream_id", sid); invalidate("class_streams"); }
+  async function removeSubject(sid: number) { await local.from("class_subjects").delete().eq("class_id", classId!).eq("subject_id", sid); invalidate("class_subjects"); }
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -240,11 +240,11 @@ function GradingSystemDialog({ onClose }: { onClose: () => void }) {
     for (const b of clean) if (isNaN(Number(b.min)) || isNaN(Number(b.max)) || Number(b.min) > Number(b.max)) { toast.error(`Band ${b.label}: invalid range.`); return; }
     setBusy(true);
     try {
-      if (isDefault) await supabase.from("grading_systems").update({ is_default: false }).neq("id", 0);
-      const { data: gs, error } = await supabase.from("grading_systems").insert({ name: name.trim(), pass_mark: Number(passMark) || 50, is_default: isDefault }).select("id").single();
+      if (isDefault) await local.from("grading_systems").update({ is_default: false }).neq("id", 0);
+      const { data: gs, error } = await local.from("grading_systems").insert({ name: name.trim(), pass_mark: Number(passMark) || 50, is_default: isDefault }).select("id").single();
       if (error) throw error;
       if (clean.length) {
-        const { error: e2 } = await supabase.from("grade_bands").insert(clean.map((b) => ({
+        const { error: e2 } = await local.from("grade_bands").insert(clean.map((b) => ({
           grading_system_id: gs.id, label: b.label.trim(), min_score: Number(b.min), max_score: Number(b.max),
           is_promotional_pass: b.kind === "pass", is_repeater: b.kind === "repeat", is_promotional_fail: b.kind === "fail",
         })));

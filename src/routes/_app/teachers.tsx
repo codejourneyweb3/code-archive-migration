@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useInvalidate, useTeachers, type Teacher } from "@/lib/db";
 import { errMsg } from "@/lib/format";
 import { pageHead } from "@/lib/seo";
@@ -28,7 +28,7 @@ function TeachersPage() {
 
   async function remove(t: Teacher) {
     if (!confirm(`Remove ${t.full_name}?`)) return;
-    const { error } = await supabase.from("teachers").delete().eq("id", t.id);
+    const { error } = await local.from("teachers").delete().eq("id", t.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("teachers", "classes");
   }
@@ -75,7 +75,7 @@ function TeacherDialog({ teacher, onClose }: { teacher: Teacher | null; onClose:
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
   async function save() {
     if (!f.full_name.trim()) { toast.error("Full name is required."); return; }
-    const { error } = teacher ? await supabase.from("teachers").update(f).eq("id", teacher.id) : await supabase.from("teachers").insert(f);
+    const { error } = teacher ? await local.from("teachers").update(f).eq("id", teacher.id) : await local.from("teachers").insert(f);
     if (error) { toast.error(errMsg(error)); return; }
     toast.success("Teacher saved."); invalidate("teachers"); onClose();
   }

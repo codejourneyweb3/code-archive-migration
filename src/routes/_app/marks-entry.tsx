@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Save, Eraser } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useAcademicData, useInvalidate, type Mark } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { useTermContext } from "@/lib/term-context";
@@ -87,11 +87,11 @@ function MarksEntryPage() {
     if (!updates.length && !inserts.length) { toast.info("No changes to save."); return; }
     setBusy(true);
     try {
-      if (updates.length) { const { error } = await supabase.from("marks").upsert(updates, { onConflict: "id" }); if (error) throw error; }
-      if (inserts.length) { const { error } = await supabase.from("marks").insert(inserts); if (error) throw error; }
-      const { data: fresh } = await supabase.from("marks").select("*").eq("assessment_id", a.id);
+      if (updates.length) { const { error } = await local.from("marks").upsert(updates, { onConflict: "id" }); if (error) throw error; }
+      if (inserts.length) { const { error } = await local.from("marks").insert(inserts); if (error) throw error; }
+      const { data: fresh } = await local.from("marks").select("*").eq("assessment_id", a.id);
       const pctDone = completionPercent(a, { ...data, marks: fresh ?? [] });
-      await supabase.from("assessments").update({ marks_entered_percent: pctDone }).eq("id", a.id);
+      await local.from("assessments").update({ marks_entered_percent: pctDone }).eq("id", a.id);
       await invalidate("marks", "assessments");
       toast.success(`Saved ${updates.length + inserts.length} mark(s).`);
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
@@ -100,7 +100,7 @@ function MarksEntryPage() {
   async function clear(studentId: number) {
     const e = existing.get(studentId);
     if (!e) { setDraft({ ...draft, [studentId]: { mark: "", remarks: "" } }); return; }
-    const { error } = await supabase.from("marks").delete().eq("id", e.id);
+    const { error } = await local.from("marks").delete().eq("id", e.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("marks");
   }

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, PenLine, CheckCircle2, Globe2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { useAcademicData, useInvalidate, type Assessment } from "@/lib/db";
 import { useAuth } from "@/lib/auth";
 import { useTermContext } from "@/lib/term-context";
@@ -51,13 +51,13 @@ function AssessmentsPage() {
   if (isLoading) return <Loading />;
 
   async function toggle(a: Assessment, field: "is_verified" | "is_published", v: boolean) {
-    const { error } = await supabase.from("assessments").update(field === "is_verified" ? { is_verified: v } : { is_published: v }).eq("id", a.id);
+    const { error } = await local.from("assessments").update(field === "is_verified" ? { is_verified: v } : { is_published: v }).eq("id", a.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("assessments");
   }
   async function remove(a: Assessment) {
     if (!confirm(`Delete "${a.name}" and all its marks?`)) return;
-    const { error } = await supabase.from("assessments").delete().eq("id", a.id);
+    const { error } = await local.from("assessments").delete().eq("id", a.id);
     if (error) { toast.error(errMsg(error)); return; }
     invalidate("assessments", "marks", "assessment_subjects");
   }
@@ -147,10 +147,10 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
       let yearId = data.years[0]?.id;
       if (!yearId) {
         const y = due ? new Date(due).getFullYear() : new Date().getFullYear();
-        const { data: ins, error } = await supabase.from("academic_years").insert({ name: `${y}-${y + 1}` }).select("id").single();
+        const { data: ins, error } = await local.from("academic_years").insert({ name: `${y}-${y + 1}` }).select("id").single();
         if (error) throw error; yearId = ins.id;
       }
-      const { data: a, error } = await supabase.from("assessments").insert({
+      const { data: a, error } = await local.from("assessments").insert({
         name: name.trim(), class_id: scope === "school" ? data.classes[0]!.id : Number(classId),
         subject_id: multi ? null : Number(subjectId), academic_year_id: yearId, term_id: Number(term),
         stream_id: scope === "stream" ? streamIds[0] ?? null : null, stream_ids: scope === "stream" ? streamIds : [],
@@ -160,7 +160,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
       }).select("id").single();
       if (error) throw error;
       if (multi) {
-        const { error: e2 } = await supabase.from("assessment_subjects").insert(subjectIds.map((sid) => ({ assessment_id: a.id, subject_id: sid })));
+        const { error: e2 } = await local.from("assessment_subjects").insert(subjectIds.map((sid) => ({ assessment_id: a.id, subject_id: sid })));
         if (e2) throw e2;
       }
       await invalidate("assessments", "assessment_subjects", "academic_years");

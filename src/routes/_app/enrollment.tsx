@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Camera, X, AlertTriangle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { uploadMedia, useAcademicData, useInvalidate } from "@/lib/db";
 import { useTermContext } from "@/lib/term-context";
 import { errMsg } from "@/lib/format";
@@ -36,7 +36,7 @@ function EnrollmentPage() {
     try {
       const photo_path = photo ? await uploadMedia("students", photo) : null;
       const draft = { ...d, lin };
-      const { error: e1 } = await supabase.from("enrollments").insert({
+      const { error: e1 } = await local.from("enrollments").insert({
         full_name: draft.full_name.trim(), lin, date_of_birth: draft.date_of_birth || null, gender: draft.gender,
         nationality: draft.nationality, religion: draft.religion, previous_school: draft.previous_school, admission_number: lin,
         guardian_name: draft.guardian_name, guardian_relationship: draft.guardian_relationship, guardian_phone: draft.guardian_phone,
@@ -48,7 +48,7 @@ function EnrollmentPage() {
         authorized_pickup_person: draft.authorized_pickup_person,
       });
       if (e1) throw e1;
-      const { error: e2 } = await supabase.from("students").insert({ ...draftToStudent(draft), photo_path });
+      const { error: e2 } = await local.from("students").insert({ ...draftToStudent(draft), photo_path });
       if (e2) throw e2;
       await invalidate("students", "enrollments");
       toast.success(`${draft.full_name} enrolled (LIN ${lin}).`);

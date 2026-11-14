@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { UserPlus, Search, Eye, Pencil, ArrowRightLeft, Ban, RotateCcw, Users, UserCheck, UserX, Upload } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import { uploadMedia, useAcademicData, useInvalidate, useMediaUrl, type Student } from "@/lib/db";
 import { TERMINATION_REASONS, terminationLabel } from "@/lib/academics";
 import { errMsg, fmtDate, initials } from "@/lib/format";
@@ -47,7 +47,7 @@ function StudentsPage() {
   const active = data.students.filter((s) => s.is_active);
 
   async function restore(s: Student) {
-    const { error } = await supabase.from("students").update({ is_active: true, termination_reason: 0, termination_date: null }).eq("id", s.id);
+    const { error } = await local.from("students").update({ is_active: true, termination_reason: 0, termination_date: null }).eq("id", s.id);
     if (error) { toast.error(error.message.includes("students_active_lin_unique") ? `Another active student already uses LIN ${s.lin}.` : errMsg(error)); return; }
     toast.success(`${s.full_name} restored.`); invalidate("students");
   }
@@ -146,7 +146,7 @@ function EditDialog({ s, onClose }: { s: Student; onClose: () => void }) {
     setBusy(true);
     try {
       const photo_path = photo ? await uploadMedia("students", photo) : s.photo_path;
-      const { error } = await supabase.from("students").update({ ...draftToStudent(d), photo_path }).eq("id", s.id);
+      const { error } = await local.from("students").update({ ...draftToStudent(d), photo_path }).eq("id", s.id);
       if (error) throw error;
       toast.success("Student updated."); invalidate("students"); onClose();
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
@@ -172,7 +172,7 @@ function ShiftDialog({ s, onClose }: { s: Student; onClose: () => void }) {
   async function save() {
     if (!classId) { toast.error("Choose a class."); return; }
     const changedClass = Number(classId) !== s.class_id;
-    const { error } = await supabase.from("students").update({
+    const { error } = await local.from("students").update({
       class_id: Number(classId), stream_id: streamId ? Number(streamId) : null,
       ...(changedClass ? { promotion_status: 3, promoted_to_class_id: Number(classId), promotion_processed_at: new Date().toISOString() } : {}),
     }).eq("id", s.id);
@@ -198,8 +198,8 @@ function TerminateDialog({ s, onClose }: { s: Student; onClose: () => void }) {
   async function run() {
     setBusy(true);
     const date = new Date().toISOString().slice(0, 10);
-    const { error } = await supabase.from("students").update({ is_active: false, termination_reason: Number(reason), termination_date: date }).eq("id", s.id);
-    if (!error) await supabase.from("termination_logs").insert({ student_id: s.id, student_name_at_termination: s.full_name, termination_reason: Number(reason), termination_date: date });
+    const { error } = await local.from("students").update({ is_active: false, termination_reason: Number(reason), termination_date: date }).eq("id", s.id);
+    if (!error) await local.from("termination_logs").insert({ student_id: s.id, student_name_at_termination: s.full_name, termination_reason: Number(reason), termination_date: date });
     setBusy(false);
     if (error) { toast.error(errMsg(error)); return; }
     toast.success(`${s.full_name} marked inactive.`); invalidate("students", "termination_logs"); onClose();

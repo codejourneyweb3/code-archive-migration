@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Eye, Printer, FileText, Save } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { local } from "@/lib/offline/client";
 import {
   useAcademicData, useFeePayments, useHeadTeacherComments, useInvalidate, useMediaUrl, useSchoolSettings, useTeachers, useTermFees,
   type AcademicData, type SchoolSettings,
@@ -161,9 +161,9 @@ function HeadComment({ studentId, termId, initial, headName }: { studentId: numb
   const [text, setText] = useState(initial);
   useEffect(() => setText(initial), [initial]);
   async function save() {
-    const { data: existing } = await supabase.from("head_teacher_comments").select("id").eq("student_id", studentId).eq("term_id", termId).maybeSingle();
+    const { data: existing } = await local.from("head_teacher_comments").select("id").eq("student_id", studentId).eq("term_id", termId).maybeSingle();
     const row = { student_id: studentId, term_id: termId, comment: text, head_teacher_name: headName };
-    const { error } = existing ? await supabase.from("head_teacher_comments").update(row).eq("id", existing.id) : await supabase.from("head_teacher_comments").insert(row);
+    const { error } = existing ? await local.from("head_teacher_comments").update(row).eq("id", existing.id) : await local.from("head_teacher_comments").insert(row);
     if (error) { toast.error(errMsg(error)); return; }
     toast.success("Remark saved."); invalidate("head_teacher_comments");
   }
