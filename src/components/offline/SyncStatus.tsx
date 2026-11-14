@@ -22,7 +22,6 @@ function ago(iso: string | null): string {
 /** Header control: connection state, number of changes waiting to sync, and the list of queued changes. */
 export function SyncStatus() {
   const st = useSyncState();
-  const { user } = useAuth();
   const mine = st.entries.filter((e) => e.userId === st.userId);
   const others = st.entries.length - mine.length;
   const failed = mine.filter((e) => e.status === "failed");
@@ -79,7 +78,6 @@ export function SyncStatus() {
             </p>
           )}
         </div>
-        {!user && null}
       </PopoverContent>
     </Popover>
   );
