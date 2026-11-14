@@ -99,7 +99,7 @@ function Invites() {
     const { error } = await local.from("invite_codes").insert({ code, label: lbl || null, allowed_pages: pages.length ? pages.join(",") : null, created_by: user?.id ?? null, expires_at: expires, role: "data_entrant" });
     if (error) { toast.error(errMsg(error)); return; }
     await navigator.clipboard?.writeText(code).catch(() => {});
-    toast.success(`Invite code ${code} created and copied.`);
+    toast.success(navigator.onLine ? `Invite code ${code} created and copied.` : `Invite code ${code} created and copied. It starts working once this device syncs.`);
     setLbl(""); invalidate("invite_codes");
   }
   async function revoke(id: number) {
