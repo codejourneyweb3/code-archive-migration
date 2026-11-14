@@ -287,3 +287,61 @@ export const PRIMARY_KEY: Record<SyncedTable, string | readonly [string, string]
   "invite_codes": "id",
   "school_settings": "id"
 };
+
+/** Foreign keys between synced tables and what deleting the parent does (mirrors the database). */
+export const FOREIGN_KEYS: { table: SyncedTable; column: string; ref: SyncedTable; onDelete: "cascade" | "set null" | "restrict" }[] = [
+  { table: "grade_bands", column: "grading_system_id", ref: "grading_systems", onDelete: "cascade" },
+  { table: "classes", column: "class_teacher_id", ref: "teachers", onDelete: "set null" },
+  { table: "classes", column: "grading_system_id", ref: "grading_systems", onDelete: "set null" },
+  { table: "class_streams", column: "class_id", ref: "classes", onDelete: "cascade" },
+  { table: "class_streams", column: "stream_id", ref: "streams", onDelete: "cascade" },
+  { table: "class_streams", column: "stream_teacher_id", ref: "teachers", onDelete: "set null" },
+  { table: "class_subjects", column: "class_id", ref: "classes", onDelete: "cascade" },
+  { table: "class_subjects", column: "subject_id", ref: "subjects", onDelete: "cascade" },
+  { table: "students", column: "class_id", ref: "classes", onDelete: "set null" },
+  { table: "students", column: "stream_id", ref: "streams", onDelete: "set null" },
+  { table: "students", column: "promoted_to_class_id", ref: "classes", onDelete: "set null" },
+  { table: "assessments", column: "class_id", ref: "classes", onDelete: "cascade" },
+  { table: "assessments", column: "subject_id", ref: "subjects", onDelete: "set null" },
+  { table: "assessments", column: "academic_year_id", ref: "academic_years", onDelete: "set null" },
+  { table: "assessments", column: "term_id", ref: "terms", onDelete: "set null" },
+  { table: "assessments", column: "stream_id", ref: "streams", onDelete: "set null" },
+  { table: "assessment_subjects", column: "assessment_id", ref: "assessments", onDelete: "cascade" },
+  { table: "assessment_subjects", column: "subject_id", ref: "subjects", onDelete: "cascade" },
+  { table: "marks", column: "student_id", ref: "students", onDelete: "cascade" },
+  { table: "marks", column: "assessment_id", ref: "assessments", onDelete: "cascade" },
+  { table: "marks", column: "subject_id", ref: "subjects", onDelete: "cascade" },
+  { table: "term_fees", column: "term_id", ref: "terms", onDelete: "cascade" },
+  { table: "term_fees", column: "class_id", ref: "classes", onDelete: "cascade" },
+  { table: "fee_payments", column: "student_id", ref: "students", onDelete: "cascade" },
+  { table: "fee_payments", column: "term_id", ref: "terms", onDelete: "set null" },
+  { table: "student_credits", column: "student_id", ref: "students", onDelete: "cascade" },
+  { table: "student_credits", column: "from_term_id", ref: "terms", onDelete: "cascade" },
+  { table: "student_credits", column: "applied_to_term_id", ref: "terms", onDelete: "set null" },
+  { table: "head_teacher_comments", column: "student_id", ref: "students", onDelete: "cascade" },
+  { table: "head_teacher_comments", column: "term_id", ref: "terms", onDelete: "cascade" },
+  { table: "termination_logs", column: "student_id", ref: "students", onDelete: "set null" },
+];
+
+/** Unique rules enforced on the device too, so offline saves fail the same way the server would. */
+export const UNIQUE_RULES: { table: SyncedTable; name: string; columns: string[]; caseInsensitive?: boolean; where?: (row: Record<string, unknown>) => boolean }[] = [
+  { table: "subjects", name: "subjects_name_unique", columns: ["name"], caseInsensitive: true },
+  { table: "students", name: "students_active_lin_unique", columns: ["lin"], caseInsensitive: true, where: (r) => r["is_active"] === true },
+  { table: "marks", name: "marks_unique", columns: ["assessment_id", "student_id", "subject_id"] },
+  { table: "term_fees", name: "term_fees_term_id_class_id_key", columns: ["term_id", "class_id"] },
+  { table: "head_teacher_comments", name: "htc_unique", columns: ["student_id", "term_id"] },
+  { table: "invite_codes", name: "invite_codes_code_key", columns: ["code"] },
+];
+
+/** Plain-language names used in the "waiting to sync" list. */
+export const TABLE_LABELS: Record<SyncedTable, [singular: string, plural: string]> = {
+  students: ["student", "students"], classes: ["class", "classes"], streams: ["stream", "streams"],
+  class_streams: ["class stream", "class streams"], subjects: ["subject", "subjects"], class_subjects: ["class subject", "class subjects"],
+  terms: ["term", "terms"], academic_years: ["academic year", "academic years"], assessments: ["assessment", "assessments"],
+  assessment_subjects: ["assessment subject", "assessment subjects"], marks: ["mark", "marks"],
+  grading_systems: ["grading system", "grading systems"], grade_bands: ["grade band", "grade bands"],
+  teachers: ["teacher", "teachers"], term_fees: ["term fee", "term fees"], fee_payments: ["fee payment", "fee payments"],
+  student_credits: ["student credit", "student credits"], budget_lines: ["budget line", "budget lines"],
+  head_teacher_comments: ["head teacher comment", "head teacher comments"], termination_logs: ["termination record", "termination records"],
+  enrollments: ["enrollment form", "enrollment forms"], invite_codes: ["invite code", "invite codes"], school_settings: ["school settings", "school settings"],
+};
